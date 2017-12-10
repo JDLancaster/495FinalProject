@@ -7,6 +7,10 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+library(ggmap)
+library(gridExtra)
 ```
 
 Group Evaluation Metrics:
@@ -18,8 +22,78 @@ Group Evaluation Metrics:
   
   
 #Exploratory Data Analysis
+<<<<<<< HEAD
 
 ```{r}
 longLat <- 
+=======
+```{r}
+test<-read_csv("./Data/test.csv")
+train<-read_csv("./Data/train.csv")
+colnames(test) #unique var is only ID
+colnames(train) #unique vars are Category, Descript, Resolution
+
+train <- train %>%
+  mutate(Hour  = factor(hour(Dates), levels=0:23), Dates = as.POSIXct(round(Dates, units = "days")), 
+         DayOfWeek = factor(DayOfWeek, levels=c("Monday","Tuesday","Wednesday","Thursday",
+                                                "Friday","Saturday","Sunday")))
+
+test <- test %>%
+  mutate(Hour  = factor(hour(Dates), levels=0:23), Dates = as.POSIXct(round(Dates, units = "days")), 
+         DayOfWeek = factor(DayOfWeek, levels=c("Monday","Tuesday","Wednesday","Thursday",
+                                                "Friday","Saturday","Sunday")))
+
+
+#Sorting into Crime Types
+table(train$Category)
+
+violent_crime <- c("ASSAULT","SEX OFFENSES FORCIBLE","ROBBERY")
+property_crime<-c("BURGLARY","LARCENY/THEFT","VEHICLE THEFT","ARSON")
+
+
+train$category_general <- ifelse(train$Category %in% violent_crime, "VIOLENT", ifelse(train$Category %in% property_crime, "PROPERTY", "OTHER"))
+train$category_general<-as.factor(train$category_general)
 ```
 
+
+```{r}
+sfMap<-get_map(location="sanfrancisco", zoom= 12, source="google")
+train2<-train[1:5000,]
+
+
+ggmap(sfMap,extent="normal") +
+  geom_density2d(data=train2,aes(X,Y),size=.3)+
+  stat_density_2d(data=train2,aes(x=X,y=Y,fill=Category),size=.01,bins=16,geom="polygon") +
+  scale_alpha(range=c(0,0,3),guide=FALSE)+
+  scale_fill_gradient(low="green",high="red")
+
+violent<-ggmap(sfMap, extent='device', legend="topleft") +
+  geom_density2d(data=filter(train2,category_general=="VIOLENT"),aes(X,Y),size=.3)+
+  stat_density_2d(data=train2,aes(x=X,y=Y,fill=Category),size=.01,bins=16,geom="polygon") +
+  ggtitle('Violent Crime in San Francisco')
+
+property<-ggmap(sfMap, extent='device', legend="topleft") +
+  geom_density2d(data=filter(train2,category_general=="PROPERTY"),aes(X,Y),size=.3)+
+  stat_density_2d(data=train2,aes(x=X,y=Y,fill=Category),size=.01,bins=16,geom="polygon") +
+  ggtitle('Property Crime in San Francisco')
+
+other<-ggmap(sfMap, extent='device', legend="topleft") +
+  geom_density2d(data=filter(train2,category_general=="OTHER"),aes(X,Y),size=.3)+
+  stat_density_2d(data=train2,aes(x=X,y=Y,fill=Category),size=.01,bins=16,geom="polygon") +
+  ggtitle('Property Crime in San Francisco')
+
+grid.arrange(violent,property,other,ncol=2)
+>>>>>>> 1b60dfc783eb9f33b75d3f5b88b2183478fc7d2f
+```
+
+
+```{r}
+#ggmap(chicago) + geom_tile(data = locationCrimes, aes(x = long, y = lat, alpha = Frequency),
+#                           fill = 'red') + theme(axis.title.y = element_blank(), axis.title.x = element_blank())
+
+ggmap(tartu_map_g_str, extent = "device") + 
+  geom_density2d(data = tartu_housing_xy_wgs84_a,aes(x = lon, y = lat), size = 0.3) + 
+  stat_density2d(data = tartu_housing_xy_wgs84_a,aes(x = lon, y = lat, fill = ..level.., alpha = ..level..), size = 0.01,bins = 16, geom = "polygon") + 
+  scale_fill_gradient(low = "green", high = "red") + 
+  scale_alpha(range = c(0, 0.3), guide = FALSE)
+```
