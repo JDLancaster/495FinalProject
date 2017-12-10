@@ -18,7 +18,8 @@ Group Evaluation Metrics:
   
   
 #Exploratory Data Analysis
-```{r}
 
+```{r}
+longLat <- 
 ```
 
