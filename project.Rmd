@@ -22,11 +22,7 @@ Group Evaluation Metrics:
   
   
 #Exploratory Data Analysis
-<<<<<<< HEAD
 
-```{r}
-longLat <- 
-=======
 ```{r}
 test<-read_csv("./Data/test.csv")
 train<-read_csv("./Data/train.csv")
@@ -83,7 +79,6 @@ other<-ggmap(sfMap, extent='device', legend="topleft") +
   ggtitle('Property Crime in San Francisco')
 
 grid.arrange(violent,property,other,ncol=2)
->>>>>>> 1b60dfc783eb9f33b75d3f5b88b2183478fc7d2f
 ```
 
 
