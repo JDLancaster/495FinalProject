@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(lubridate)
 library(ggmap)
+library(gridExtra)
 ```
 
 Group Evaluation Metrics:
@@ -61,15 +62,22 @@ ggmap(sfMap,extent="normal") +
   scale_alpha(range=c(0,0,3),guide=FALSE)+
   scale_fill_gradient(low="green",high="red")
 
-ggmap(sfMap, extent='device') +
-  geom_point(aes(x=X, y=Y, colour=Category), data=train2 ) +
-  scale_colour_discrete(guide='none') +
-  facet_wrap(~Category) +
+violent<-ggmap(sfMap, extent='device', legend="topleft") +
+  geom_density2d(data=filter(train2,category_general=="VIOLENT"),aes(X,Y),size=.3)+
+  stat_density_2d(data=train2,aes(x=X,y=Y,fill=Category),size=.01,bins=16,geom="polygon") +
   ggtitle('Violent Crime in San Francisco')
 
-ggmap(sfMap, extent='device', legend="topleft") +
-geom_point(aes(x=X, y=Y, colour=category_general), data=train2 ) +  
-ggtitle('Violent Crime in San Francisco')
+property<-ggmap(sfMap, extent='device', legend="topleft") +
+  geom_density2d(data=filter(train2,category_general=="PROPERTY"),aes(X,Y),size=.3)+
+  stat_density_2d(data=train2,aes(x=X,y=Y,fill=Category),size=.01,bins=16,geom="polygon") +
+  ggtitle('Property Crime in San Francisco')
+
+other<-ggmap(sfMap, extent='device', legend="topleft") +
+  geom_density2d(data=filter(train2,category_general=="OTHER"),aes(X,Y),size=.3)+
+  stat_density_2d(data=train2,aes(x=X,y=Y,fill=Category),size=.01,bins=16,geom="polygon") +
+  ggtitle('Property Crime in San Francisco')
+
+grid.arrange(violent,property,other,ncol=2)
 ```
 
 
@@ -83,4 +91,3 @@ ggmap(tartu_map_g_str, extent = "device") +
   scale_fill_gradient(low = "green", high = "red") + 
   scale_alpha(range = c(0, 0.3), guide = FALSE)
 ```
-
