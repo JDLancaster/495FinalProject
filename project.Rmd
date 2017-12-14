@@ -11,6 +11,7 @@ library(tidyverse)
 library(lubridate)
 library(ggmap)
 library(gridExtra)
+library(viridis)
 ```
 
 Group Evaluation Metrics:
@@ -39,7 +40,6 @@ test <- test %>%
          DayOfWeek = factor(DayOfWeek, levels=c("Monday","Tuesday","Wednesday","Thursday",
                                                 "Friday","Saturday","Sunday")))
 
-
 #Sorting into Crime Types
 table(train$Category)
 
@@ -54,41 +54,36 @@ train$category_general<-as.factor(train$category_general)
 
 ```{r}
 sfMap<-get_map(location="sanfrancisco", zoom= 12, source="google")
-train2<-train[1:5000,]
-
-
-ggmap(sfMap,extent="normal") +
-  geom_density2d(data=train2,aes(X,Y),size=.3)+
-  stat_density_2d(data=train2,aes(x=X,y=Y,fill=Category),size=.01,bins=16,geom="polygon") +
-  scale_alpha(range=c(0,0,3),guide=FALSE)+
-  scale_fill_gradient(low="green",high="red")
+train2<-train[sample(nrow(train), 1000), ]
 
 violent<-ggmap(sfMap, extent='device', legend="topleft") +
-  geom_density2d(data=filter(train2,category_general=="VIOLENT"),aes(X,Y),size=.3)+
-  stat_density_2d(data=train2,aes(x=X,y=Y,fill=Category),size=.01,bins=16,geom="polygon") +
-  ggtitle('Violent Crime in San Francisco')
+  stat_density_2d(data=filter(train2,category_general=="VIOLENT"),aes(x=X,y=Y,fill=..level..),size=.01,bins=16,geom="polygon",alpha=.2,show.legend = F) +
+  scale_fill_continuous(low="black",high="red")+
+  ggtitle('Violent Crime')
 
 property<-ggmap(sfMap, extent='device', legend="topleft") +
-  geom_density2d(data=filter(train2,category_general=="PROPERTY"),aes(X,Y),size=.3)+
-  stat_density_2d(data=train2,aes(x=X,y=Y,fill=Category),size=.01,bins=16,geom="polygon") +
-  ggtitle('Property Crime in San Francisco')
+  stat_density_2d(data=filter(train2,category_general=="PROPERTY"),aes(x=X,y=Y,fill=..level..),size=.01,bins=16,geom="polygon",alpha=.2,show.legend = F) +
+  scale_fill_continuous(low="black",high="red")+
+  ggtitle('Property Crime')
 
 other<-ggmap(sfMap, extent='device', legend="topleft") +
-  geom_density2d(data=filter(train2,category_general=="OTHER"),aes(X,Y),size=.3)+
-  stat_density_2d(data=train2,aes(x=X,y=Y,fill=Category),size=.01,bins=16,geom="polygon") +
-  ggtitle('Property Crime in San Francisco')
+  stat_density_2d(data=filter(train2,category_general=="OTHER"),aes(x=X,y=Y,fill=..level..),size=.01,bins=16,geom="polygon",alpha=.2,show.legend = F) +
+  scale_fill_continuous(low="black",high="red")+
+  ggtitle('Other Crime')
 
-grid.arrange(violent,property,other,ncol=2)
+grid.arrange(violent,property,other,ncol=2) #basic 3 density maps
 ```
 
-
 ```{r}
-#ggmap(chicago) + geom_tile(data = locationCrimes, aes(x = long, y = lat, alpha = Frequency),
-#                           fill = 'red') + theme(axis.title.y = element_blank(), axis.title.x = element_blank())
+weekend<-ggmap(sfMap, extent='device', legend="topleft") +
+  stat_density_2d(data=filter(train2,DayOfWeek %in% c("Saturday","Sunday")),aes(x=X,y=Y,fill=..level..),size=.01,bins=16,geom="polygon",alpha=.2,show.legend = F) +
+  scale_fill_continuous(low="black",high="red")+
+  ggtitle('Weekend')
 
-ggmap(tartu_map_g_str, extent = "device") + 
-  geom_density2d(data = tartu_housing_xy_wgs84_a,aes(x = lon, y = lat), size = 0.3) + 
-  stat_density2d(data = tartu_housing_xy_wgs84_a,aes(x = lon, y = lat, fill = ..level.., alpha = ..level..), size = 0.01,bins = 16, geom = "polygon") + 
-  scale_fill_gradient(low = "green", high = "red") + 
-  scale_alpha(range = c(0, 0.3), guide = FALSE)
+weekday<-ggmap(sfMap, extent='device', legend="topleft") +
+  stat_density_2d(data=filter(train2,DayOfWeek%in%c("Monday","Tuesday","Wednesday","Thursday","Friday")), aes(x=X,y=Y,fill=..level..),size=.01,bins=16,geom="polygon",alpha=.2,show.legend = F) +
+  scale_fill_continuous(low="black",high="red")+
+  ggtitle('Weekday')
+
+grid.arrange(weekend,weekday,ncol=2)
 ```
