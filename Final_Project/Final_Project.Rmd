@@ -1,6 +1,6 @@
 ---
 title: "Final Project"
-author: "WRITE GROUP MEMBERS NAMES HERE!"
+author: "Tasheena Narraidoo, Jeffrey Lancaster, Luke Haggerty"
 date: "December 22, 2017"
 output:
   html_document:
@@ -18,7 +18,12 @@ output:
 ## Load all packages
 
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
-
+library(tidyverse)
+library(ggmap)
+library(gridExtra)
+library(ggExtra)
+library(lubridate)
+library(viridis)
 ```
 
 
@@ -32,7 +37,10 @@ other words, load data via `read_csv("data/CSV_NAME.csv")` and not via
 `read_csv("/Users/aykim/Documents/MATH495/Final_Project/data/CSV_NAME.csv")`
 
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
-
+#load train data
+train <- read_csv("data/train.csv")
+#load test data
+test <- read_csv("data/test.csv")
 ```
 
 
