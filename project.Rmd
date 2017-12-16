@@ -85,4 +85,8 @@ weekday<-ggmap(sfMap, extent='device', legend="topleft") +
   ggtitle('Weekday')
 
 grid.arrange(weekend,weekday,ncol=2)
+<<<<<<< HEAD
 ```
+=======
+```
+>>>>>>> 54f9dc7be3743e387e1742ea2d1c34b9386a0612
