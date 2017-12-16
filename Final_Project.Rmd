@@ -32,12 +32,6 @@ knitr::opts_chunk$set(
 
 # Methods
 
-## k nearest neighbors
-
-## Multinomial Regression
-
-## Random Forest
-
 # Challenges
 
 # Conclusion
