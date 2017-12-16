@@ -1,6 +1,6 @@
 ---
 title: "Final Project"
-author: "WRITE GROUP MEMBERS NAMES HERE!"
+author: "Tasheena Narraidoo, Jeffrey Lancaster, Luke Haggerty"
 date: "December 22, 2017"
 output:
   html_document:
