@@ -54,39 +54,57 @@ Note: If you had to illustrate using no modelling but only graphs and tables whi
 variables have the most predictive power, which would you include?
 
 ```{r, echo=FALSE}
+# Status: Completed (Just need to upload latest version)
 # Table with variable description
+var_name <- c("1 ", " 2")
+var_description <- c(" 3", "4 ")
+tbl <- cbind(var_name,var_description)
+colnames(tbl) <- c("Variable Name", "Variable Description")
+tbl %>% knitr::kable(digits=4)
+```
+
+```{r, echo=FALSE}
+# Checking our variables
+# Status: Completed (Just need to upload latest version)
 
 ```
 
 ```{r, echo=FALSE}
 # Overall distribution of crimes
+# Status: Completed (Just need to upload latest version)
 
 ```
 
 ```{r, echo=FALSE}
 # Distribution over time for the Top 5 crimes
+# Status: Completed (Just need to upload latest version)
 
 ```
 
 ```{r, echo=FALSE}
 # Crime distribution by Time
+# Status: Completed (Just need to upload latest version)
 
 ```
 
 ```{r, echo=FALSE}
 # Crime distribution by Day
+# Status: Completed (Just need to upload latest version)
 
 ```
 
 ```{r, echo=FALSE}
 # Crime distribution by Month
+# Status: Completed (Just need to upload latest version)
 
 ```
 
-```{r, echo=FALSE}
-# Checking our variables
 
-```
+* Perform a cross-validation on only the final/ultimate model used for your
+submission.
+* The "score" in question should be the same as used to compute the Kaggle
+leaderboard. In other words, your estimated score should be roughly equal to the
+score returned by Kaggle after your submission.
 
 ## Ultimate model
 
@@ -95,11 +113,6 @@ variables have the most predictive power, which would you include?
 
 ```
 
-* Perform a cross-validation on only the final/ultimate model used for your
-submission.
-* The "score" in question should be the same as used to compute the Kaggle
-leaderboard. In other words, your estimated score should be roughly equal to the
-score returned by Kaggle after your submission.
 
 ## Crossvalidation of ultimate model
 
