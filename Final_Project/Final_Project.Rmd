@@ -17,6 +17,8 @@ output:
 
 ## Load all packages
 
+We have used `tidyverse` and `lubridate` for data cleaning and manipulation and for basic EDA, `ggmap` for additional EDA and `nnet` for our model.
+
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
 library(tidyverse)
 library(ggmap)
@@ -24,25 +26,26 @@ library(gridExtra)
 library(ggExtra)
 library(lubridate)
 library(viridis)
+library(nnet)
 ```
 
 
 
 ## Load data and perform data cleaning
 
-Please delete all "notes" before submission.
-
-Note: CSV/data files should be read assuming they are in the `data` folder. In
-other words, load data via `read_csv("data/CSV_NAME.csv")` and not via
-`read_csv("/Users/aykim/Documents/MATH495/Final_Project/data/CSV_NAME.csv")`
-
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
+# Load Data
 #load train data
-train <- read_csv("data/train.csv")
+# train <- read_csv("data/train.csv")
 #load test data
-test <- read_csv("data/test.csv")
+# test <- read_csv("data/test.csv")
 ```
 
+```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
+# Data Cleaning
+
+
+```
 
 
 ## EDA visualizations and tables
@@ -50,13 +53,53 @@ test <- read_csv("data/test.csv")
 Note: If you had to illustrate using no modelling but only graphs and tables which
 variables have the most predictive power, which would you include?
 
+```{r, echo=FALSE}
+# Table with variable description
+
+```
+
+```{r, echo=FALSE}
+# Overall distribution of crimes
+
+```
+
+```{r, echo=FALSE}
+# Distribution over time for the Top 5 crimes
+
+```
+
+```{r, echo=FALSE}
+# Crime distribution by Time
+
+```
+
+```{r, echo=FALSE}
+# Crime distribution by Day
+
+```
+
+```{r, echo=FALSE}
+# Crime distribution by Month
+
+```
+
+```{r, echo=FALSE}
+# Checking our variables
+
+```
+
+## Ultimate model
+
+```{r, echo=FALSE}
+
+
+```
+
 * Perform a cross-validation on only the final/ultimate model used for your
 submission.
 * The "score" in question should be the same as used to compute the Kaggle
 leaderboard. In other words, your estimated score should be roughly equal to the
 score returned by Kaggle after your submission.
-
-
 
 ## Crossvalidation of ultimate model
 
@@ -81,6 +124,11 @@ close to your crossvalidated score.
 
 Note: All citations and references must be included here.
 
+*
+
+*
+
+*
 
 
 ## Supplementary materials
