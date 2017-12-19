@@ -28,6 +28,7 @@ library(lubridate)
 library(RColorBrewer)
 library(generalhoslem)
 library(MLmetrics)
+library(glmnet)
 #library(car)
 ```
 
@@ -38,9 +39,9 @@ library(MLmetrics)
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
 # Load Data
 #load train data
-#train <- read_csv("data/train.csv")
+train <- read_csv("data/train.csv")
 #load test data
-#test <- read_csv("data/test.csv")
+test <- read_csv("data/test.csv")
 ```
 
 We are going to create three more variables (`Year`,`Month`, `Hour`) from the given `Dates` variables for EDA purposes.
@@ -220,6 +221,7 @@ m1 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour,
 ```{r, echo=FALSE, eval=FALSE}
 Anova(m1)
 # Results
+```
 Analysis of Deviance Table (Type II tests)
 
 Response: Category
@@ -229,7 +231,6 @@ PdDistrict  19365.6 342  < 2.2e-16 ***
 Hour         4333.7  38  < 2.2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-```
 
 ## Crossvalidation of ultimate model
 
@@ -242,74 +243,96 @@ score returned by Kaggle after your submission.
 Note: Hardcode your crossvalidation here i.e. do not use built-in crossvalidation
 options.
 
+```{r}
+#Cross Validation using glmnet
+
+#Takes a really long time to run
+this<-training1 
+
+x <- this %>% select(PdDistrict, DayOfWeek, Hour) %>% 
+  mutate(PdDistrict=as.factor(PdDistrict),DayOfWeek=as.factor(DayOfWeek))
+
+table(x[,3])
+
+table(this$Category)
+
+fit = glmnet(data.matrix(x),as.factor(this$Category), family = "multinomial", type.multinomial = "grouped")
+plot(fit, xvar = "lambda", label = TRUE, type.coef = "2norm")
+
+cvfit=cv.glmnet(data.matrix(x),as.factor(this$Category), family="multinomial", type.multinomial = "grouped", parallel = TRUE)
+plot(cvfit)
+
+predict(cvfit, newx = x[1:10,], s = "lambda.min", type = "class")
+```
+
+
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
 
 #This is a function that will create a six-fold cross validation with degrees of freedom and the dataset as inputs and return the average Mean Square Error
+set.seed(100)
+validation1 <- train_samp %>%  #first fold
+  sample_n(20000)
+training1 <- train_samp %>% 
+  anti_join(validation1, by="ID")
 
-  validation1 <- train_samp %>%  #first fold
-    sample_n(20000)
-  training1 <- train_samp %>% 
-    anti_join(validation1, by="ID")
+validation2 <- training1 %>% #second fold
+  sample_n(20000)
+training2prime <- training1 %>% 
+  anti_join(validation2, by="ID")
+training2 <- training2prime %>%
+  bind_rows(validation1)
 
-  validation2 <- training1 %>% #second fold
-    sample_n(20000)
-  training2prime <- training1 %>% 
-    anti_join(validation2, by="ID")
-  training2 <- training2prime %>%
-    bind_rows(validation1)
+validation3 <- training2prime %>% #third fold
+  sample_n(20000)
+training3prime <- training2prime %>% 
+  anti_join(validation3, by="ID")
+training3 <- training3prime %>%
+  bind_rows(validation2)
+training3 <- training3 %>%
+  bind_rows(validation1)
 
-  validation3 <- training2prime %>% #third fold
-    sample_n(20000)
-  training3prime <- training2prime %>% 
-    anti_join(validation3, by="ID")
-  training3 <- training3prime %>%
-    bind_rows(validation2)
-  training3 <- training3 %>%
-    bind_rows(validation1)
-
-  validation4 <- training3prime %>% #fourth fold
-    sample_n(20000)
-  training4prime <- training3prime %>% 
-    anti_join(validation4, by="ID")
-  training4 <- training4prime %>%
-    bind_rows(validation3)
-  training4 <- training4 %>%
-    bind_rows(validation2)
-  training4 <- training4 %>%
-    bind_rows(validation1)
-
-
-  validation5 <- training4prime #fifth fold
-  training5 <- training4 %>% 
-    anti_join(validation5, by="ID")
-  training5 <- training5 %>%
-    bind_rows(validation4)
+validation4 <- training3prime %>% #fourth fold
+  sample_n(20000)
+training4prime <- training3prime %>% 
+  anti_join(validation4, by="ID")
+training4 <- training4prime %>%
+  bind_rows(validation3)
+training4 <- training4 %>%
+  bind_rows(validation2)
+training4 <- training4 %>%
+  bind_rows(validation1)
 
 
-  model1 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
+validation5 <- training4prime #fifth fold
+training5 <- training4 %>% 
+  anti_join(validation5, by="ID")
+training5 <- training5 %>%
+  bind_rows(validation4)
+
+
+model1 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
                data = training1, maxit = 200) #first fitted model
-  test_1 <- predict(model1, validation1, probability = TRUE)
-  MultiLogLoss(validation1$Category, attr(test_1, "probabilities"))
+test_1 <- predict(model1, validation1, probability = TRUE)
+MultiLogLoss(validation1$Category, attr(test_1, "probabilities"))
 
-  model2 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
+model2 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
                data = training2, maxit = 200) #second fitted model
-  test_2 <- predict(model2, validation2$Category) %>% as.tibble()
+test_2 <- predict(model2, validation2$Category) %>% as.tibble()
 
 
-  model3 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
+model3 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
                data = training3, maxit = 200) #third fitted model
-  test3 <- predict(model3, validation3$Category) %>% as.tibble()
+test3 <- predict(model3, validation3$Category) %>% as.tibble()
 
 
-  model4 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
+model4 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
                data = training4, maxit = 200) #fourth fitted model
-  test4 <- predict(model4, validation4$Category) %>% as.tibble()
+test4 <- predict(model4, validation4$Category) %>% as.tibble()
 
 
-  model5 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
+model5 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
                data = training5, maxit = 200) #fifth fitted model
-  test5 <- predict(model5, validation5$Category) %>% as.tibble()
-
+test5 <- predict(model5, validation5$Category) %>% as.tibble()
  
 ```
 
