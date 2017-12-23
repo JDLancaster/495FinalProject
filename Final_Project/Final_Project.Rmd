@@ -1,21 +1,23 @@
 ---
-title: "Final Project"
+  title: "Final Project"
 author: "Tasheena Narraidoo, Jeffrey Lancaster, Luke Haggerty"
 date: "December 22, 2017"
 output:
   html_document:
-    toc: true
-    toc_depth: 2
-    toc_float:
-      collapsed: false
-      smooth_scroll: false
-    df_print: kable
+  toc: true
+toc_depth: 2
+toc_float:
+  collapsed: false
+smooth_scroll: false
+df_print: kable
 ---
-
-
-## Load all packages
-
-We have used `tidyverse` and `lubridate` for data cleaning & manipulation and for basic EDA, `ggmap` for additional EDA and `nnet` for our model.
+  
+  
+  
+  
+  ## Load all packages
+  
+  We have used `tidyverse` and `lubridate` for data cleaning & manipulation and for basic EDA, `ggmap` for additional EDA and `nnet` for our model.
 
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
 library(tidyverse)
@@ -27,9 +29,9 @@ library(nnet)
 library(lubridate)
 library(RColorBrewer)
 library(generalhoslem)
-library(MLmetrics)
 library(ModelMetrics)
-#library(car)
+library(car)
+library(knitr)
 ```
 
 
@@ -42,6 +44,11 @@ library(ModelMetrics)
 #train <- read_csv("data/train.csv")
 #load test data
 #test <- read_csv("data/test.csv")
+
+load(file = "originalData.rda")
+load(file = "modelsCV.rda")
+load(file = "modelsFolds.rda")
+
 ```
 
 We are going to create three more variables (`Year`,`Month`, `Hour`) from the given `Dates` variables for EDA purposes.
@@ -55,7 +62,7 @@ train1 <- train %>%
   mutate(Year = year(formatted_date),
          Month = month(formatted_date),
          Hour = hour(formatted_date),
-         ID = 1:878049
+         ID = seq(1:nrow(train))
   ) 
 
 ### Extract Top Five Crimes for visualization
@@ -82,10 +89,14 @@ test1 <- test %>%
 
 ```
 
+
 ## EDA visualizations and tables
 
-Note: If you had to illustrate using no modelling but only graphs and tables which
-variables have the most predictive power, which would you include?
+The following map shows San Francisco broken down by Police Districts. This map gives us a better idea on the scope of the project and helps us to visually identify the Police District names found in our data set.  
+
+
+![San Francisco Police District Map.](mapSF.png)
+
 
 ```{r, echo=FALSE}
 # Status: Completed (Just need to upload latest version)
@@ -100,7 +111,7 @@ var_description <- c("timestamp of the crime incident",
                      "the approximate street address of the crime incident",
                      "Longitude",
                      "Latitude"
-                     )
+)
 tbl <- cbind(var_name,var_description)
 colnames(tbl) <- c("Variable Name", "Variable Description")
 names(dimnames(tbl)) <- list("", "Variable Description")
@@ -111,9 +122,9 @@ tbl %>% knitr::kable(digits=4, caption= "Original Variables with Description")
 # Overall distribution of crimes
 g1 <- ggplot(ordered_data) +
   geom_bar(aes(x= reorder(Category, -count), 
-                y=count,
-                color = reorder(Category, -count),
-                fill = reorder(Category, -count)),
+               y=count,
+               color = reorder(Category, -count),
+               fill = reorder(Category, -count)),
            stat = "identity") +
   coord_flip()
 
@@ -144,7 +155,7 @@ train4 <- train1 %>%
 
 
 train4$DayOfWeek = factor(train4$DayOfWeek, levels= c("Monday", 
-    "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday","Sunday"))
+                                                      "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday","Sunday"))
 
 g3 <- ggplot(train4, 
              aes(x=DayOfWeek, y=count,
@@ -182,6 +193,33 @@ g3 + ggtitle("Crime distribution by hour") +
 From the hour of the day breakdown we notice that most crimes occur during the day (from 8 am to around 6 pm). This is the time window when people commute to work and are at work. 
 
 ```{r, echo=FALSE}
+# Crime distribution by Month
+
+train3 <- train1 %>% 
+  group_by(Month,Year) %>% 
+  summarise(count = n())
+
+g3 <- ggplot(train3, 
+             aes(x= as.factor(Month), 
+                 y=count,
+                 fill = as.factor(Month))
+) + 
+  geom_boxplot()
+
+months <- c("Jan", "Feb", "Mar", "Apr","May","Jun", 
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+g3 + ggtitle("Crime distribution by month") +
+  xlab("month") +
+  ylab("Number of crime incidents") +
+  theme(legend.position = "None", plot.title = element_text(hjust = 0.5)) +
+  scale_x_discrete(breaks = 1:12, labels = months, position = "bottom")
+
+```
+
+From the `Crime distribution by month` we notice that October has the highest median. That seemed odd considering there are no major holidays in October. We thought this might be due to the way the training and test set were split. Odd numbered weeks were assigned to the train set and the rest to the test set. So major holiday weeks might have gone in the test set. So `Month` would not be a good predictor.
+
+```{r, echo=FALSE}
 # Crime distribution by PdDistrict
 
 train6 <- train1 %>% 
@@ -208,116 +246,119 @@ From the above plots, `PdDistrict`, `DayOfWeek` and `Hour` seem to indicate when
 
 ## Ultimate model
 
-For our ultimate model, we have decided to use `multinomial logistic regression` because our reponse variable is a categorical outcome variable. We have decided to use `PdDistrict`, `DayOfWeek` and `Hour`
-variables from our EDA. Also, they were all significant variables when we ran our `anova` test.
+For our ultimate model, we have decided to use `multinomial logistic regression` because our reponse variable is a categorical outcome variable. We have decided to use `PdDistrict`, `DayOfWeek` and `Hour` variables from our EDA. Also, they were all significant variables when we ran our `anova` test.
 
 ```{r, echo=FALSE, eval=FALSE}
-train_samp = sample_n(train1, 100000)
+set.seed(495)
+train_samp = sample_n(train1, 200000)
+
 m1 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
                data = train_samp, maxit = 200)
-
 ```
 
 ```{r, echo=FALSE, eval=FALSE}
-Anova(m1)
+anov <- Anova(m1)
 # Results
 Analysis of Deviance Table (Type II tests)
 
 Response: Category
-           LR Chisq  Df Pr(>Chisq)    
-DayOfWeek    6953.7 228  < 2.2e-16 ***
-PdDistrict  19365.6 342  < 2.2e-16 ***
-Hour         4333.7  38  < 2.2e-16 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+LR Chisq  Df Pr(>Chisq)    
+PdDistrict  31549.9 342  < 2.2e-16 ***
+  DayOfWeek    8370.1 228  < 2.2e-16 ***
+  Hour         6494.4  38  < 2.2e-16 ***
+  ---
+  Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+```
+
+Our Anove results:
+  
+  ```{r, echo=FALSE}
+print(anov)
 ```
 
 ## Crossvalidation of ultimate model
 
-* Perform a cross-validation on only the final/ultimate model used for your
-submission.
-* The "score" in question should be the same as used to compute the Kaggle
-leaderboard. In other words, your estimated score should be roughly equal to the
-score returned by Kaggle after your submission.
+Our crossvalidation results was 2.8, in terms of multi-class log error.
 
-Note: Hardcode your crossvalidation here i.e. do not use built-in crossvalidation
-options.
+```{r, message=FALSE, include=FALSE, eval=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
 
-```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
+set.seed(495)
 
 #This is a function that will create a six-fold cross validation with degrees of freedom and the dataset as inputs and return the average Mean Square Error
 
 
-  validation1 <- train_samp %>%  #first fold
-    sample_n(20000)
-  training1 <- train_samp %>% 
-    anti_join(validation1, by="ID")
+validation1 <- train_samp %>%  #first fold
+  sample_n(40000)
+training1 <- train_samp %>% 
+  anti_join(validation1, by="ID")
 
-  validation2 <- training1 %>% #second fold
-    sample_n(20000)
-  training2prime <- training1 %>% 
-    anti_join(validation2, by="ID")
-  training2 <- training2prime %>%
-    bind_rows(validation1)
+validation2 <- training1 %>% #second fold
+  sample_n(40000)
+training2prime <- training1 %>% 
+  anti_join(validation2, by="ID")
+training2 <- training2prime %>%
+  bind_rows(validation1)
 
-  validation3 <- training2prime %>% #third fold
-    sample_n(20000)
-  training3prime <- training2prime %>% 
-    anti_join(validation3, by="ID")
-  training3 <- training3prime %>%
-    bind_rows(validation2)
-  training3 <- training3 %>%
-    bind_rows(validation1)
+validation3 <- training2prime %>% #third fold
+  sample_n(40000)
+training3prime <- training2prime %>% 
+  anti_join(validation3, by="ID")
+training3 <- training3prime %>%
+  bind_rows(validation2) %>%
+  bind_rows(validation1)
 
-  validation4 <- training3prime %>% #fourth fold
-    sample_n(20000)
-  training4prime <- training3prime %>% 
-    anti_join(validation4, by="ID")
-  training4 <- training4prime %>%
-    bind_rows(validation3)
-  training4 <- training4 %>%
-    bind_rows(validation2)
-  training4 <- training4 %>%
-    bind_rows(validation1)
+validation4 <- training3prime %>% #fourth fold
+  sample_n(40000)
+training4prime <- training3prime %>% 
+  anti_join(validation4, by="ID")
+training4 <- training4prime %>%
+  bind_rows(validation3) %>%
+  bind_rows(validation2) %>%
+  bind_rows(validation1)
 
 
-  validation5 <- training4prime #fifth fold
-  training5 <- training4 %>% 
-    anti_join(validation5, by="ID")
-  training5 <- training5 %>%
-    bind_rows(validation4)
+validation5 <- training4prime #fifth fold
+training5 <- training4 %>% 
+  anti_join(validation5, by="ID")
+training5 <- training5 %>%
+  bind_rows(validation4)
 
 
-  model1 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
-               data = training1, maxit = 200) #first fitted model
-  test_1 <- predict(model1, validation1, type = "probs") %>% data.matrix()
-  mll1<- mlogLoss(validation1$Category, test_1)
+model1 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
+                   data = training1, maxit = 200) #first fitted model
+test_1 <- predict(model1, validation1, type = "probs") %>% data.matrix()
+mll1<- mlogLoss(validation1$Category, test_1)
 
-  model2 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
-               data = training2, maxit = 200) #second fitted model
-  test_2 <- predict(model2, validation2, type = "probs") %>% data.matrix()
-  mll2<- mlogLoss(validation2$Category, test_2)
+model2 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
+                   data = training2, maxit = 200) #second fitted model
+test_2 <- predict(model2, validation2, type = "probs") %>% data.matrix()
+mll2<- mlogLoss(validation2$Category, test_2)
 
-  model3 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
-               data = training3, maxit = 200) #third fitted model
-  test_3 <- predict(model3, validation3, type = "probs") %>% data.matrix()
-  mll3<- mlogLoss(validation3$Category, test_3)
+model3 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
+                   data = training3, maxit = 200) #third fitted model
+test_3 <- predict(model3, validation3, type = "probs") %>% data.matrix()
+mll3 <- mlogLoss(validation3$Category, test_3)
 
-  model4 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
-               data = training4, maxit = 200) #fourth fitted model
-  test_4 <- predict(model4, validation4, type = "probs") %>% data.matrix()
-  mll4<- mlogLoss(validation4$Category, test_4)
+model4 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
+                   data = training4, maxit = 200) #fourth fitted model
+test_4 <- predict(model4, validation4, type = "probs") %>% data.matrix()
+mll4 <- mlogLoss(validation4$Category, test_4)
 
-  model5 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
-               data = training5, maxit = 200) #fifth fitted model
-  test_5 <- predict(model5, validation5, type = "probs") %>% data.matrix()
-  mll5<- mlogLoss(validation5$Category, test_5)
- 
-  cvscore <- (mll1 + mll2 + mll3 + mll4 + mll5)/5
-  
-  cvscore
+model5 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
+                   data = training5, maxit = 200) #fifth fitted model
+test_5 <- predict(model5, validation5, type = "probs") %>% data.matrix()
+mll5<- mlogLoss(validation5$Category, test_5)
+
+cvscore <- (mll1 + mll2 + mll3 + mll4 + mll5)/5
+
+cvscore
+
 ```
 
+```{r, echo=FALSE}
+print("cvscore: ")
+print(cvscore)
+```
 
 
 ## Create submission
@@ -325,9 +366,10 @@ options.
 On submitting our model on Kaggle, we got a score of around 2.6.
 
 ```{r, echo=FALSE, eval=FALSE}
-id <- seq(0,884261)
+id <- 0:884261
 predictions <- predict(m1, test1, "probs")
-pred1 <- cbind(id, predictions)
+pred1 <- format(predictions, sci = FALSE)
+pred1 <- cbind(id, pred1)
 pred1 <- as.data.frame(pred1)
 write_csv(pred1, path = "data/submission.csv")
 ```
@@ -335,14 +377,10 @@ write_csv(pred1, path = "data/submission.csv")
 
 ## Citations and references
 
-Note: All citations and references must be included here.
-
 * Data sets. Retrieved from https://www.kaggle.com/c/sf-crime
 
-* https://www.statmethods.net/management/sorting.html
-
 * Multinomial Logistic Regression. Retrieved from https://stats.idre.ucla.edu/r/dae/multinomial-logistic-regression/
-
-
+  
+  * San Francisco Police Dept. District Map. Retrieved from http://hoodline.com/2015/07/citywide-sfpd-redistricting-to-take-effect-sunday 
 
 ## Supplementary materials
