@@ -232,7 +232,7 @@ div.tocify {
 
 <div id="load-all-packages" class="section level2">
 <h2>Load all packages</h2>
-<p>We have used <code>tidyverse</code> and <code>lubridate</code> for data cleaning &amp; manipulation and for basic EDA, <code>ggmap</code> for additional EDA and <code>nnet</code> for our model.</p>
+<p>We have used <code>tidyverse</code> and <code>lubridate</code> for data cleaning &amp; manipulation and for basic EDA, <code>ggmap</code> for additional EDA and <code>nnet</code> for our model. To compute the multi-class log loss for our cross validation, we used the <code>ModelMetrics</code> package.</p>
 </div>
 <div id="load-data-and-perform-data-cleaning" class="section level2">
 <h2>Load data and perform data cleaning</h2>
@@ -309,7 +309,10 @@ div.tocify {
 <div id="ultimate-model" class="section level2">
 <h2>Ultimate model</h2>
 <p>For our ultimate model, we have decided to use <code>multinomial logistic regression</code> because our reponse variable is a categorical outcome variable. We have decided to use <code>PdDistrict</code>, <code>DayOfWeek</code> and <code>Hour</code> variables from our EDA as our predictor variables. Also, they were all significant predictor variables when we ran our <code>Anova</code> test.</p>
+<p>We used a sample of size 200,000, which is roughly a quarter of our train set. This decision was made due to computation time and we also used <code>maxit</code> to get more accurate results.</p>
 <p><code>MULTINOMIAL DESCRIPTION</code></p>
+<pre class="r"><code>m1 &lt;- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
+               data = train_samp, maxit = 200)</code></pre>
 <p>Our Anove results:</p>
 <pre><code>## Analysis of Deviance Table (Type II tests)
 ## 
@@ -324,13 +327,13 @@ div.tocify {
 <div id="crossvalidation-of-ultimate-model" class="section level2">
 <h2>Crossvalidation of ultimate model</h2>
 <p><code>CROSSVALIDATION DESCRIPTION</code></p>
-<p>Our crossvalidation results was 2.8, in terms of multi-class log error.</p>
+<p>Our crossvalidation results was 2.8, in terms of multi-class log loss error.</p>
 <pre><code>## [1] &quot;cvscore: &quot;</code></pre>
 <pre><code>## [1] 2.8</code></pre>
 </div>
 <div id="create-submission" class="section level2">
 <h2>Create submission</h2>
-<p>On submitting our best model on Kaggle, we got a score of around 2.6 which is close to our crossvalidation multi-class log error of 2.8.</p>
+<p>On submitting our best model on Kaggle, we got a score of around 2.6 which is close to our crossvalidation multi-class log loss of 2.8.</p>
 </div>
 <div id="citations-and-references" class="section level2">
 <h2>Citations and references</h2>
