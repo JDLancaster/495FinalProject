@@ -312,7 +312,15 @@ div.tocify {
 <pre class="r"><code>m1 &lt;- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
                data = train_samp, maxit = 200)</code></pre>
 <p>Our Anove results:</p>
-<p><code>## Analysis of Deviance Table (Type II tests)   ##    ## Response: Category   ##            LR Chisq  Df Pr(&gt;Chisq)       ## PdDistrict  31549.9 342  &lt; 2.2e-16 ***   ## DayOfWeek    8370.1 228  &lt; 2.2e-16 ***   ## Hour         6494.4  38  &lt; 2.2e-16 ***   ## ---   ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></p>
+<pre><code>## Analysis of Deviance Table (Type II tests)
+## 
+## Response: Category
+##            LR Chisq  Df Pr(&gt;Chisq)    
+## PdDistrict  31549.9 342  &lt; 2.2e-16 ***
+## DayOfWeek    8370.1 228  &lt; 2.2e-16 ***
+## Hour         6494.4  38  &lt; 2.2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
 <div id="crossvalidation-of-ultimate-model" class="section level2">
 <h2>Crossvalidation of ultimate model</h2>

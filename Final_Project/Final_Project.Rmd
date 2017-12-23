@@ -260,7 +260,7 @@ m1 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour,
                data = train_samp, maxit = 200)
 ```
 
-```{r, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE, fig.width=8, fig.height=4.5,}
 anov <- Anova(m1)
 # Results
 Analysis of Deviance Table (Type II tests)
@@ -268,15 +268,15 @@ Analysis of Deviance Table (Type II tests)
 Response: Category
 LR Chisq  Df Pr(>Chisq)    
 PdDistrict  31549.9 342  < 2.2e-16 ***
-  DayOfWeek    8370.1 228  < 2.2e-16 ***
-  Hour         6494.4  38  < 2.2e-16 ***
-  ---
-  Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+DayOfWeek    8370.1 228  < 2.2e-16 ***
+Hour         6494.4  38  < 2.2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 
 Our Anove results:
   
-  ```{r, echo=FALSE}
+```{r, echo=FALSE}
 print(anov)
 ```
 
