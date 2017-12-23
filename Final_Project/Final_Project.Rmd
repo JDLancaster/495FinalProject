@@ -17,7 +17,7 @@ df_print: kable
   
 ## Load all packages
   
-We have used `tidyverse` and `lubridate` for data cleaning & manipulation and for basic EDA, `ggmap` for additional EDA and `nnet` for our model.
+We have used `tidyverse` and `lubridate` for data cleaning & manipulation and for basic EDA, `ggmap` for additional EDA and `nnet` for our model. To compute the multi-class log loss for our cross validation, we used the `ModelMetrics` package.
 
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
 library(tidyverse)
@@ -28,7 +28,6 @@ library(viridis)
 library(nnet)
 library(lubridate)
 library(RColorBrewer)
-library(generalhoslem)
 library(ModelMetrics)
 library(car)
 library(knitr)
@@ -41,9 +40,13 @@ library(knitr)
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
 # Load Data
 #load train data
-train <- read_csv("data/train.csv")
+#train <- read_csv("data/train.csv")
 #load test data
-test <- read_csv("data/test.csv")
+#test <- read_csv("data/test.csv")
+
+load(file = "originalData.rda")
+load(file = "modelsCV.rda")
+load(file = "modelsFolds.rda")
 
 ```
 
@@ -116,16 +119,8 @@ We next looked at a map showing San Francisco broken down by Police Districts. T
 
 ![San Francisco Police District Map.](mapSF.png)
 
-```{r}
-sfMap<-get_map(location="sanfrancisco", zoom= 12, source="google")
-ggmap(sfMap, extent='device', legend="topleft")+
-  stat_density_2d(data=sample_n(train,10000),
-                  aes(x=X,y=Y,fill=..level..),size=.01,bins=16,geom="polygon",alpha=.2,show.legend = F)+
-  scale_fill_continuous(low="black",high="red")+
-  ggtitle('HeatMap of Crime in SanFrancisco')
-```
 
-The heatmap plot allows us to visualize crime distribution in SanFrancisco.  As we observed in the barplot, most crime occurrs around the districts in the top right of the city, especially the Tenderloin.
+
 Our next step was to look at the breakdown of crime by `Category`. This allows us to identify the most and least common type of crimes reported. We are also able to understand how our observations are divided.
 
 
@@ -144,8 +139,8 @@ g1 + ggtitle("Number of crimes in each category") +
   ylab("Category of crime") + 
   theme(legend.position="none") 
 ```
- 
- 
+
+
 From the graph above we see that `LARCENY/THEFT` is the Number 1 most reported crime category. The bottom 10 categories seem to have low reported number of incidents. Indeed, the top 10 crime categories accounted for over 83 % of total number of crimes reported and the top 20 crime categories accounted for over 96%. We have therefore decided to concentrate on predicting top crimes when making our model to increase accuracy. Theft seems to be the number 1 crime reported as `LARCENY/THEFT`, `BURGLARY`, `VEHICLE THEFT`, `ROBBERY` are all thefts and they are in our Top 15 crimes reported. We will use this broad categorization to analyze type of crime against the different predictor variables such as the hour crimes were committed, day of week crimes occurred, and area in which crimes were reported using Police Dept District.
 
 
@@ -261,12 +256,16 @@ From the above plots, `PdDistrict`, `DayOfWeek` and `Hour` seem to indicate when
 
 For our ultimate model, we have decided to use `multinomial logistic regression` because our reponse variable is a categorical outcome variable. We have decided to use `PdDistrict`, `DayOfWeek` and `Hour` variables from our EDA as our predictor variables. Also, they were all significant predictor variables when we ran our `Anova` test.
 
+We used a sample of size 200,000, which is roughly a quarter of our train set. This decision was made due to computation time and we also used `maxit` to get more accurate results.
+
 `MULTINOMIAL DESCRIPTION`
 
 ```{r, echo=FALSE, eval=FALSE}
 set.seed(495)
 train_samp = sample_n(train1, 200000)
+```
 
+```{r, eval=FALSE}
 m1 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
                data = train_samp, maxit = 200)
 ```
@@ -287,7 +286,7 @@ PdDistrict  31549.9 342  < 2.2e-16 ***
 
 Our Anove results:
   
-```{r, echo=FALSE}
+  ```{r, echo=FALSE}
 print(anov)
 ```
 
@@ -295,7 +294,7 @@ print(anov)
 
 `CROSSVALIDATION DESCRIPTION`
 
-Our crossvalidation results was 2.8, in terms of multi-class log error.
+Our crossvalidation results was 2.8, in terms of multi-class log loss error.
 
 ```{r, message=FALSE, include=FALSE, eval=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
 
@@ -380,7 +379,7 @@ print(cvscore)
 
 ## Create submission
 
-On submitting our best model on Kaggle, we got a score of around 2.6 which is close to our crossvalidation multi-class log error of 2.8.
+On submitting our best model on Kaggle, we got a score of around 2.6 which is close to our crossvalidation multi-class log loss of 2.8.
 
 ```{r, echo=FALSE, eval=FALSE}
 id <- 0:884261
