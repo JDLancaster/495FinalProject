@@ -41,9 +41,9 @@ library(knitr)
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
 # Load Data
 #load train data
-#train <- read_csv("data/train.csv")
+train <- read_csv("data/train.csv")
 #load test data
-#test <- read_csv("data/test.csv")
+test <- read_csv("data/test.csv")
 
 ```
 
@@ -162,7 +162,7 @@ g3 + ggtitle("Crime distribution by weekday") +
 
 ```
 
-From the weekday graph it would seem that Sunday has seen the lowest median of crimes committed. This is probably because most people are at home on Sunday. Friday has the highest median, and this is probably because people are most likely to go out on Fridays.
+From the weekday graph it would seem that Sunday has seen the lowest median of crimes committed. This is probably because most people are at home on Sunday. Friday has the highest median, and this is probably because people are most likely to go out on Fridays. Color here is just the day of week to add some variety.
 
 ```{r, echo=FALSE}
 # Crime distribution by Hour
@@ -183,7 +183,7 @@ g3 + ggtitle("Crime distribution by hour") +
 
 ```
 
-From the hour of the day breakdown we notice that most crimes occur during the day (from 8 am to around 6 pm). This is the time window when people commute to work and are at work. 
+From the hour of the day breakdown we notice that most crimes occur during the day (from 8 am to around 6 pm). This is the time window when people commute to work and are at work. It would make sense that most crimes are during this window as this is a time where lots of people are moving around and are vulnerable to differnt types of crime.
 
 ```{r, echo=FALSE}
 # Crime distribution by Month
@@ -231,11 +231,18 @@ g3 + ggtitle("Crime distribution by Police District") +
         plot.title = element_text(hjust = 0.5),
         axis.text.x = element_text(angle=45, hjust =1))
 
+
+
+
+
 ```
+
 
 The Southern District seems to be leading in terms of number of crimes being reported. 
 
-From the above plots, `PdDistrict`, `DayOfWeek` and `Hour` seem to indicate when thefts are highly to occur. Since our broad definition of thefts account for most crimes reported, we believe that these variables would be good indicators of the type of crime likely to have been committed.
+From the above plots, `PdDistrict`, `DayOfWeek` and `Hour` seem to indicate when thefts are highly to occur. Since our broad definition of thefts account for most crimes reported, we believe that these variables would be good indicators of the type of crime likely to have been committed.  Below we have a map of SF police distrits to add some context to this boxplot.  Most of the crime is gathered around the top left of the map
+
+![Map of San Francisco PD Districts](https://hoodwork-production.s3.amazonaws.com/uploads/story/image/10247/sfpdfinal.png)
 
 ## Ultimate model
 
