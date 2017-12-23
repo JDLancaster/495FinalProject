@@ -43,7 +43,6 @@ library(knitr)
 train <- read_csv("data/train.csv")
 #load test data
 test <- read_csv("data/test.csv")
-
 ```
 
 We are going to create three more variables (`Year`,`Month`, `Hour`) from the given `Dates` variables for EDA purposes.
@@ -90,7 +89,6 @@ test1 <- test %>%
 Our original test data has nine variables as seen in the table below. Our test set has the same variablees except for `Category` (our response variable), `Descrip` and `Resolution` as the two latter variables would include the category of the crime reported. Each observation in our data set represents a crime reported between 1/1/2003 and 5/13/2015. Our train set has `878,049` observations while our test set has `884,262` observations. The weeks were numbered and crimes reported in odd-numbered weeks formed the train set and the rest formed our test set.
 
 ```{r, echo=FALSE}
-# Status: Completed (Just need to upload latest version)
 # Table with variable description
 var_name <- c(names(train[1:9]))
 var_description <- c("timestamp of the crime incident", 
@@ -391,7 +389,9 @@ write_csv(pred1, path = "data/submission.csv")
 
 ## Supplementary materials
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
+![San Francisco Crime HeatMap.](heatmap.png)
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
 sfMap<-get_map(location="sanfrancisco", zoom= 12, source="google")
 ggmap(sfMap, extent='device', legend="topleft")+
   stat_density_2d(data=sample_n(train,10000),
