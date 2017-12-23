@@ -45,10 +45,6 @@ library(knitr)
 #load test data
 #test <- read_csv("data/test.csv")
 
-
-load(file = "originalData.rda")
-load(file = "modelsCV.rda")
-load(file = "modelsFolds.rda")
 ```
 
 We are going to create three more variables (`Year`,`Month`, `Hour`) from the given `Dates` variables for EDA purposes.
@@ -89,9 +85,6 @@ test1 <- test %>%
 
 ```
 
-```{r, echo=FALSE, eval=FALSE}
-#save(train, test, train1, test1, grouped_train_data,group_data_category, ordered_data,top_5, file = "originalData.Rda")
-```
 
 ## EDA visualizations and tables
 
@@ -254,7 +247,6 @@ train_samp = sample_n(train1, 200000)
 
 m1 <- multinom(Category ~ PdDistrict + DayOfWeek +  Hour, 
                data = train_samp, maxit = 200)
-#m2 <- multinom(Category ~ PdDistrict + DayOfWeek, data = train_samp, maxit = 100)
 ```
 
 ```{r, echo=FALSE, eval=FALSE}
