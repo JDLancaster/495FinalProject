@@ -40,13 +40,9 @@ library(knitr)
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
 # Load Data
 #load train data
-#train <- read_csv("data/train.csv")
+train <- read_csv("data/train.csv")
 #load test data
-#test <- read_csv("data/test.csv")
-
-load(file = "originalData.rda")
-load(file = "modelsCV.rda")
-load(file = "modelsFolds.rda")
+test <- read_csv("data/test.csv")
 
 ```
 
@@ -254,11 +250,7 @@ From the above plots, `PdDistrict`, `DayOfWeek` and `Hour` seem to indicate when
 
 ## Ultimate model
 
-For our ultimate model, we have decided to use `multinomial logistic regression` because our reponse variable is a categorical outcome variable. We have decided to use `PdDistrict`, `DayOfWeek` and `Hour` variables from our EDA as our predictor variables. Also, they were all significant predictor variables when we ran our `Anova` test.
-
-We used a sample of size 200,000, which is roughly a quarter of our train set. This decision was made due to computation time and we also used `maxit` to get more accurate results.
-
-`MULTINOMIAL DESCRIPTION`
+For our ultimate model, we have decided to use `multinomial logistic regression` because our reponse variable is a categorical outcome variable. We have decided to use `PdDistrict`, `DayOfWeek` and `Hour` variables from our EDA as our predictor variables. Also, they were all significant predictor variables when we ran our `Anova` test. We used a sample of size 200,000, which is roughly a quarter of our train set. This decision was made due to computation time and we also used `maxit` to get more accurate results. Multinomial logistic regression is used to model categorical outcome variables, where the log odds of the outcomes are modeled as a linear combination of the predictor variables. We used the `multinom()` function from the `nnet` library to estimate a multinomial logistic regression model. We ran our multinorm model over 200 iterations to get a good model.
 
 ```{r, echo=FALSE, eval=FALSE}
 set.seed(495)
@@ -292,9 +284,7 @@ print(anov)
 
 ## Crossvalidation of ultimate model
 
-`CROSSVALIDATION DESCRIPTION`
-
-Our crossvalidation results was 2.8, in terms of multi-class log loss error.
+For our cross-validation, we have decided to use 5-fold coss-validation. We divided our data into five equal folds each containing 40,000 unique observations. The sample were generated from the training sample of 200,000 observations we used to run our ultimate model on. Our cross-validation results was 2.8, in terms of multi-class log loss error.
 
 ```{r, message=FALSE, include=FALSE, eval=FALSE, warning=FALSE, fig.width=8, fig.height=4.5, echo=FALSE}
 
@@ -400,3 +390,14 @@ write_csv(pred1, path = "data/submission.csv")
 * San Francisco Police Dept. District Map. Retrieved from http://hoodline.com/2015/07/citywide-sfpd-redistricting-to-take-effect-sunday 
 
 ## Supplementary materials
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+sfMap<-get_map(location="sanfrancisco", zoom= 12, source="google")
+ggmap(sfMap, extent='device', legend="topleft")+
+  stat_density_2d(data=sample_n(train,10000),
+                  aes(x=X,y=Y,fill=..level..),size=.01,bins=16,geom="polygon",alpha=.2,show.legend = F)+
+  scale_fill_continuous(low="black",high="red")+
+  ggtitle('HeatMap of Crime in SanFrancisco')
+```
+
+The heatmap plot allows us to visualize crime distribution in SanFrancisco.  As we observed in the barplot, most crime occurrs around the districts in the top right of the city, especially the Tenderloin.
