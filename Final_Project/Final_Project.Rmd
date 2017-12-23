@@ -44,6 +44,11 @@ library(knitr)
 #train <- read_csv("data/train.csv")
 #load test data
 #test <- read_csv("data/test.csv")
+
+
+load(file = "originalData.rda")
+load(file = "modelsCV.rda")
+load(file = "modelsFolds.rda")
 ```
 
 We are going to create three more variables (`Year`,`Month`, `Hour`) from the given `Dates` variables for EDA purposes.
