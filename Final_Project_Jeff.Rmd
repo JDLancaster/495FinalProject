@@ -207,6 +207,14 @@ The Southern District seems to be leading in terms of number of crimes being rep
 From the above plots, `PdDistrict`, `DayOfWeek` and `Hour` seem to indicate when thefts are highly to occur. Since our broad definition of thefts account for most crimes reported, we believe that these variables would be good indicators of the type of crime likely to have been committed.  Below is a map of the police districts in San Fransico - we can see that most of the crime is concentrated at the top right.  Another interesting tidbit is that the richest district in the city is the Presidio - which is the only part of the map below without a police district assigned to it.
 
 ![Map of San Francisco PD Districts](https://hoodwork-production.s3.amazonaws.com/uploads/story/image/10247/sfpdfinal.png)
+```{r}
+sfMap<-get_map(location="sanfrancisco", zoom= 12, source="google")
+ggmap(sfMap, extent='device', legend="topleft")+
+  stat_density_2d(data=sample_n(train,10000),
+                  aes(x=X,y=Y,fill=..level..),size=.01,bins=16,geom="polygon",alpha=.2,show.legend = F)+
+  scale_fill_continuous(low="black",high="red")+
+  ggtitle('HeatMap of Crime in SanFrancisco')
+```
 
 ## Ultimate model
 
